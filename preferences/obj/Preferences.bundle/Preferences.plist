@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key> 	<string>PSGroupCell</string>
+			<key>label</key> 	<string></string>
+			<key>footerText</key> 	<string>For changes to take effect, simply quit and reopen Safari.</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.frostbitee08.ScrollControl</string>
+			<key>key</key>
+			<string>enabled</string>
+			<key>label</key>
+			<string>Enabled</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.frostbitee08.ScrollControl</string>
+			<key>key</key>
+			<string>animated</string>
+			<key>label</key>
+			<string>Animated</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.frostbitee08.ScrollControl</string>
+			<key>key</key>
+			<string>indicator</string>
+			<key>label</key>
+			<string>Show Scroll Bar</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.frostbitee08.ScrollControl</string>
+			<key>key</key>
+			<string>hasSearch</string>
+			<key>label</key>
+			<string>Include Search Tab</string>
+		</dict>
+		<dict>
+			<key>cell</key>  		<string>PSLinkListCell</string>
+			<key>defaults</key> 	<string>com.frostbitee08.ScrollControl</string>
+ 			<key>detail</key> 		<string>PSListItemsController</string>
+ 			<key>key</key> 			<string>indicatorType</string>
+ 			<key>label</key> 		<string>Indicator Type</string>
+ 			<key>validTitles</key> <array>
+ 				<string>Bullet</string>
+ 				<string>Alphabetical</string>
+ 				<string>Numerical</string>
+ 			</array>
+ 			<key>validValues</key>
+ 			<array>
+				<string>Bullet</string>
+ 				<string>Alphabetical</string>
+ 				<string>Numerical</string>
+ 			</array>
+		</dict>
+	</array>
+	<key>title</key>
+	<string>Scroll Control</string>
+</dict>
+</plist>

@@ -1,0 +1,9 @@
+Package: com.frostbitee08.scrollcontrol
+Name: Scroll Control
+Depends: mobilesubstrate
+Version: 0.0.1
+Architecture: iphoneos-arm
+Description: An awesome MobileSubstrate tweak!
+Maintainer: Rocco Del Priore
+Author: Rocco Del Priore
+Section: Tweaks
