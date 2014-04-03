@@ -98,6 +98,7 @@ static int controlTag = 900;
 			[control setMaxHeight:maxHeight];
 			[control setHasSearch:[[settings objectForKey:@"hasSearch"] boolValue]];
 			[control setAnimated:[[settings objectForKey:@"animated"] boolValue]];
+			[control setHasBackdrop:YES];
 			control.delegate = self;
 		    control.tag = controlTag;
 

@@ -51,6 +51,7 @@
         _maxTabSize = 0;
         _maxHeight = 0;
         _hasSearch = NO;
+        _addBackdrop = YES;
         _indicatorType = SCIndicatorTypeBullet;
         _shouldFade = YES;
         _alphabet = [[NSMutableArray alloc] init];
@@ -61,6 +62,12 @@
 
         [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchDragOutside];
         [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchUpInside];
+
+        _backdrop = [[UIView alloc] init];
+        [_backdrop setBackgroundColor:[UIColor blackColor]];
+        [_backdrop setAlpha:.5];
+        _backdrop.layer.cornerRadius = 10;
+        _backdrop.layer.masksToBounds = YES;
     }
     return self;
 }
@@ -76,6 +83,7 @@
         _maxTabSize = 0;
         _maxHeight = 0;
         _hasSearch = NO;
+        _addBackdrop = YES;
         _indicatorType = SCIndicatorTypeBullet;
         _shouldFade = YES;
         _alphabet = [[NSMutableArray alloc] init];
@@ -87,6 +95,12 @@
 
         [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchDragOutside];
         [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchUpInside];
+
+        _backdrop = [[UIView alloc] init];
+        [_backdrop setBackgroundColor:[UIColor blackColor]];
+        [_backdrop setAlpha:.5];
+        _backdrop.layer.cornerRadius = 10;
+        _backdrop.layer.masksToBounds = YES;
     }
     return self;
 }
@@ -96,6 +110,14 @@
 - (BOOL)beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event {
     [self handleTouch:touch];
     _shouldFade = NO;
+    [_backdrop setHidden:NO];
+
+    for (int i = 0; i < self.subviews.count; ++i) {
+        if ([[self.subviews objectAtIndex:i] isMemberOfClass:[UILabel class]]) {
+            UILabel *temp = (UILabel *)[self.subviews objectAtIndex:i];
+            [temp setTextColor:[UIColor whiteColor]];
+        }
+    }
     return TRUE;
 }
 
@@ -122,6 +144,13 @@
 
 - (void)fade {
     if (_shouldFade) {
+        [_backdrop setHidden:YES];
+        for (int i = 0; i < self.subviews.count; ++i) {
+            if ([[self.subviews objectAtIndex:i] isMemberOfClass:[UILabel class]]) {
+                UILabel *temp = (UILabel *)[self.subviews objectAtIndex:i];
+                [temp setTextColor:[UIColor darkGrayColor]];
+            }
+        }
         [self setHiddenAnimated:TRUE];
     }
 }
@@ -202,12 +231,13 @@
         int increment = tabs;
         if (_hasSearch) {
             increment -= 1;
-            UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, iter, frame.size.width, _tabSize)];
-            [label setText:@"s"];
-            [label setTextColor:[UIColor darkGrayColor]];
-            [label setBackgroundColor:[UIColor clearColor]];
-            [label setTextAlignment:NSTextAlignmentCenter];
-            [self addSubview:label];
+            UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, iter, frame.size.width, _tabSize)];
+            [view setBackgroundColor:[UIColor clearColor]];
+            UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake((frame.size.width/2)-5, (_tabSize/2)-5,10,10)];
+            [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/Application Support/ScrollControl/search_icon@2x.png"]];
+            [view addSubview:imageView];
+
+            [self addSubview:view];
             iter+=_tabSize;
         }
         for (unsigned int i = 0; i < increment; i++) {
@@ -229,6 +259,19 @@
             [self addSubview:label];
             iter+=_tabSize;
         }
+
+        if (_addBackdrop) {
+            frame.origin.x = 0;
+            frame.origin.y = 0;
+
+            [_backdrop setFrame:frame];
+            [_backdrop setHidden:YES];
+            [self addSubview:_backdrop];
+            [self sendSubviewToBack:_backdrop];
+        }
+        else {
+            [_backdrop removeFromSuperview];
+        }
     }
 }
 
@@ -243,6 +286,10 @@
 - (void)setHasSearch:(bool)hasSearch {
     _hasSearch = hasSearch;
     [self setFrameWithTabs:_tabs];
+}
+
+- (void)setHasBackdrop:(bool)hasBackdrop {
+    _addBackdrop = hasBackdrop;
 }
 
 @end

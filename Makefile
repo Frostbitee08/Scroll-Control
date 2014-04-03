@@ -2,7 +2,7 @@ include theos/makefiles/common.mk
 
 TWEAK_NAME = ScrollControl
 ScrollControl_FILES = Tweak.xm ScrollControl.m
-ScrollControl_FRAMEWORKS = UIKit
+ScrollControl_FRAMEWORKS = UIKit, QuartzCore
 
 include $(THEOS_MAKE_PATH)/tweak.mk
 
