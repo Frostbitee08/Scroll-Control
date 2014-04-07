@@ -59,6 +59,7 @@ static int controlTag = 900;
 		int tabs = ceil(scrollView.contentSize.height/scrollView.frame.size.height);
 		if (tabs >= 3) {
 			[control appear];
+			[control updateIndex];
 		}
 	}
 }
@@ -114,7 +115,7 @@ static int controlTag = 900;
 		    }
 		}
 
-		int tabs = ceil(scrollView.contentSize.height/scrollView.frame.size.height);
+		int tabs = floor(scrollView.contentSize.height/scrollView.frame.size.height);
 		if (tabs < 3) {
 			[control setHidden:TRUE];
 		}

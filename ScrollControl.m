@@ -43,31 +43,33 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // Initialization code
         _currentPage = 0;
         _tabs = 0;
-        _animated = NO;
         _tabSize = 0;
         _maxTabSize = 0;
         _maxHeight = 0;
+        _animated = NO;
         _hasSearch = NO;
         _addBackdrop = YES;
-        _indicatorType = SCIndicatorTypeBullet;
         _shouldFade = YES;
+        _indicatorType = SCIndicatorTypeBullet;
         _alphabet = [[NSMutableArray alloc] init];
-        int a = 65;
-        for (; a < 91; a++) {
-            [_alphabet addObject:[NSString stringWithFormat:@"%c", (char)a]];
-        }
-
-        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchDragOutside];
-        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchUpInside];
-
+        _labels =  [[NSMutableArray alloc] init];
+        _searchImage = [UIImage imageWithContentsOfFile:@"/Library/Application Support/ScrollControl/search_icon@2x.png"];
+        _searchImageWhite = [UIImage imageWithContentsOfFile:@"/Library/Application Support/ScrollControl/search_icon_white@2x.png"];
+        _searchView = [[UIImageView alloc] init];
         _backdrop = [[UIView alloc] init];
         [_backdrop setBackgroundColor:[UIColor blackColor]];
         [_backdrop setAlpha:.5];
         _backdrop.layer.cornerRadius = 10;
         _backdrop.layer.masksToBounds = YES;
+
+        for (int a = 65; a < 91; a++) {
+            [_alphabet addObject:[NSString stringWithFormat:@"%c", (char)a]];
+        }
+
+        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchDragOutside];
+        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchUpInside];
     }
     return self;
 }
@@ -75,32 +77,33 @@
 - (id)init {
     self = [super init];
     if (self) {
-        // Initialization code
         _currentPage = 0;
         _tabs = 0;
-        _animated = NO;
         _tabSize = 0;
         _maxTabSize = 0;
         _maxHeight = 0;
+        _animated = NO;
         _hasSearch = NO;
         _addBackdrop = YES;
-        _indicatorType = SCIndicatorTypeBullet;
         _shouldFade = YES;
+        _indicatorType = SCIndicatorTypeBullet;
         _alphabet = [[NSMutableArray alloc] init];
-        int a = 65;
-        for (; a < 91; a++) {
-            [_alphabet addObject:[NSString stringWithFormat:@"%c", (char)a]];
-        }
-
-
-        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchDragOutside];
-        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchUpInside];
-
+        _labels =  [[NSMutableArray alloc] init];
+        _searchImage = [UIImage imageWithContentsOfFile:@"/Library/Application Support/ScrollControl/search_icon@2x.png"];
+        _searchImageWhite = [UIImage imageWithContentsOfFile:@"/Library/Application Support/ScrollControl/search_icon_white@2x.png"];
+        _searchView = [[UIImageView alloc] init];
         _backdrop = [[UIView alloc] init];
         [_backdrop setBackgroundColor:[UIColor blackColor]];
         [_backdrop setAlpha:.5];
         _backdrop.layer.cornerRadius = 10;
         _backdrop.layer.masksToBounds = YES;
+
+        for (int a = 65; a < 91; a++) {
+            [_alphabet addObject:[NSString stringWithFormat:@"%c", (char)a]];
+        }
+
+        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchDragOutside];
+        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchUpInside];
     }
     return self;
 }
@@ -118,6 +121,7 @@
             [temp setTextColor:[UIColor whiteColor]];
         }
     }
+    //[_searchView setImage:_searchImageWhite]; //Why does this Crash? Bad white Search image obviously, but why? Possibly something to do with Photoshop
     return TRUE;
 }
 
@@ -151,35 +155,56 @@
                 [temp setTextColor:[UIColor darkGrayColor]];
             }
         }
+        if (_hasSearch) {
+            [_searchView setImage:_searchImage];
+        }
+
         [self setHiddenAnimated:TRUE];
+    }
+}
+
+- (void)updateIndex {
+    int answer = floor(_scrollView.contentOffset.y/_scrollView.frame.size.height);
+
+    [_labels makeObjectsPerformSelector:@selector(setFont:) withObject:[UIFont systemFontOfSize:14]];
+    if (answer < _labels.count) {
+        UILabel *highlightedLabel = (UILabel *)[_labels objectAtIndex:answer];
+        [highlightedLabel setFont:[UIFont boldSystemFontOfSize:20]];
+    }
+    else {
+        UILabel *highlightedLabel = (UILabel *)[_labels objectAtIndex:0];
+        [highlightedLabel setFont:[UIFont boldSystemFontOfSize:20]];
     }
 }
 
 - (void)handleTouch:(UITouch *)touch {
     CGPoint point = [touch locationInView:self];
     int answer = floor(point.y/_tabSize);
+
+    if (answer == 0 && _hasSearch) {
+        [self.delegate search];
+    }
+    else if (_hasSearch) {
+        answer -=1;
+    }
     if (answer != _currentPage && answer >=0 && answer<=_tabs) {
+        [_labels makeObjectsPerformSelector:@selector(setFont:) withObject:[UIFont systemFontOfSize:14]];
+        if (answer < _labels.count) {
+            UILabel *highlightedLabel = (UILabel *)[_labels objectAtIndex:answer];
+            [highlightedLabel setFont:[UIFont boldSystemFontOfSize:20]];
+        }
+
         [self setPage:answer];
     }
 }
 
 - (void)setPage:(int)page {
-    if (page == 0 && _hasSearch) {
-        [self.delegate search];
-    }
-    else if (_hasSearch) {
-        page -= 1;
-    }
-
     float offset = _scrollView.frame.size.height*page;
     if (offset > _scrollView.contentSize.height-_scrollView.frame.size.height) {
         offset = _scrollView.contentSize.height-_scrollView.frame.size.height;
     }
-    
-    else {
-        [_scrollView setContentOffset:CGPointMake(0, offset) animated:_animated];
-        _currentPage = page;
-    }
+    [_scrollView setContentOffset:CGPointMake(_scrollView.contentOffset.x, offset) animated:_animated];
+    _currentPage = page;
 }
 
 #pragma mark - Modifiers
@@ -208,7 +233,7 @@
             [self setHidden:FALSE];
         }
 
-        _currentPage = -1;
+        _currentPage = 0;
         _tabs = tabs;
         CGRect frame = self.frame;
         float height = _maxTabSize * tabs;
@@ -233,13 +258,16 @@
             increment -= 1;
             UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, iter, frame.size.width, _tabSize)];
             [view setBackgroundColor:[UIColor clearColor]];
-            UIImageView *imageView = [[UIImageView alloc] initWithFrame:CGRectMake((frame.size.width/2)-5, (_tabSize/2)-5,10,10)];
-            [imageView setImage:[UIImage imageWithContentsOfFile:@"/Library/Application Support/ScrollControl/search_icon@2x.png"]];
-            [view addSubview:imageView];
+
+            _searchView = [[UIImageView alloc] initWithFrame:CGRectMake((frame.size.width/2)-5, (_tabSize/2)-5,10,10)];
+            [_searchView setImage:_searchImage];
+            [view addSubview:_searchView];
 
             [self addSubview:view];
             iter+=_tabSize;
         }
+
+        [_labels removeAllObjects];
         for (unsigned int i = 0; i < increment; i++) {
             UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, iter, frame.size.width, _tabSize)];
             if (_indicatorType == SCIndicatorTypeBullet) {
@@ -256,6 +284,7 @@
             [label setTextColor:[UIColor darkGrayColor]];
             [label setBackgroundColor:[UIColor clearColor]];
             [label setTextAlignment:NSTextAlignmentCenter];
+            [_labels insertObject:label atIndex:i];
             [self addSubview:label];
             iter+=_tabSize;
         }

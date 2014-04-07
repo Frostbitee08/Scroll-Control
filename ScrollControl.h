@@ -22,16 +22,20 @@ typedef enum {
 @interface ScrollControl : UIControl {
     int _currentPage;
     int _tabs;
+    float _tabSize;
+    float _maxTabSize;
+    float _maxHeight;
     bool _animated;
     bool _hasSearch;
     bool _shouldFade;
     bool _addBackdrop;
-    float _tabSize;
-    float _maxTabSize;
-    float _maxHeight;
-    UIView *_backdrop;
-    NSMutableArray *_alphabet;
     SCIndicatorType _indicatorType;
+    NSMutableArray *_alphabet;
+    NSMutableArray *_labels;
+    UIImage *_searchImage;
+    UIImage *_searchImageWhite;
+    UIView *_backdrop;
+    UIImageView *_searchView;
 }
 
 @property (nonatomic, assign) id<ScrollControlDelegate> delegate;
@@ -39,6 +43,7 @@ typedef enum {
 
 - (void)fade;
 - (void)appear;
+- (void)updateIndex;
 - (void)setHasBackdrop:(bool)hasBackdrop;
 - (void)setHasSearch:(bool)hasSearch;
 - (void)setIndicatorType:(SCIndicatorType)type;
