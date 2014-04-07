@@ -67,7 +67,8 @@
             [_alphabet addObject:[NSString stringWithFormat:@"%c", (char)a]];
         }
 
-        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchDragOutside];
+        //Fade after scrolling
+        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchUpOutside];
         [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchUpInside];
     }
     return self;
@@ -101,7 +102,8 @@
             [_alphabet addObject:[NSString stringWithFormat:@"%c", (char)a]];
         }
 
-        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchDragOutside];
+        //Fade after scrolling
+        [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchUpOutside];
         [self addTarget:self action:@selector(nowFade) forControlEvents:UIControlEventTouchUpInside];
     }
     return self;
@@ -114,13 +116,11 @@
     _shouldFade = NO;
     [_backdrop setHidden:NO];
 
-    for (int i = 0; i < self.subviews.count; ++i) {
-        if ([[self.subviews objectAtIndex:i] isMemberOfClass:[UILabel class]]) {
-            UILabel *temp = (UILabel *)[self.subviews objectAtIndex:i];
-            [temp setTextColor:[UIColor whiteColor]];
-        }
+    [_labels makeObjectsPerformSelector:@selector(setTextColor:) withObject:[UIColor whiteColor]];
+    if (_hasSearch && _searchImageWhite) {
+        //[_searchView setImage:_searchImageWhite]; //Why does this Crash? Possibly issues with image from PS?
     }
-    //[_searchView setImage:_searchImageWhite]; //Why does this Crash? Bad white Search image obviously, but why? Possibly something to do with Photoshop
+    
     return TRUE;
 }
 
@@ -148,12 +148,7 @@
 - (void)fade {
     if (_shouldFade) {
         [_backdrop setHidden:YES];
-        for (int i = 0; i < self.subviews.count; ++i) {
-            if ([[self.subviews objectAtIndex:i] isMemberOfClass:[UILabel class]]) {
-                UILabel *temp = (UILabel *)[self.subviews objectAtIndex:i];
-                [temp setTextColor:[UIColor darkGrayColor]];
-            }
-        }
+        [_labels makeObjectsPerformSelector:@selector(setTextColor:) withObject:[UIColor darkGrayColor]];
         if (_hasSearch) {
             [_searchView setImage:_searchImage];
         }
@@ -163,11 +158,11 @@
 }
 
 - (void)updateIndex {
-    int answer = floor(_scrollView.contentOffset.y/_scrollView.frame.size.height);
+    int page = floor(_scrollView.contentOffset.y/_scrollView.frame.size.height);
 
     [_labels makeObjectsPerformSelector:@selector(setFont:) withObject:[UIFont systemFontOfSize:14]];
-    if (answer < _labels.count) {
-        UILabel *highlightedLabel = (UILabel *)[_labels objectAtIndex:answer];
+    if (page < _labels.count) {
+        UILabel *highlightedLabel = (UILabel *)[_labels objectAtIndex:page];
         [highlightedLabel setFont:[UIFont boldSystemFontOfSize:20]];
     }
     else {
@@ -177,31 +172,40 @@
 }
 
 - (void)handleTouch:(UITouch *)touch {
+    //Calculate Page
     CGPoint point = [touch locationInView:self];
-    int answer = floor(point.y/_tabSize);
+    int page = floor(point.y/_tabSize);
 
-    if (answer == 0 && _hasSearch) {
+    //Make adjustments
+    if (page == 0 && _hasSearch) {
         [self.delegate search];
     }
     else if (_hasSearch) {
-        answer -=1;
+        page -=1;
     }
-    if (answer != _currentPage && answer >=0 && answer<=_tabs) {
+
+    //Update Page and Labels as Necessary
+    if (page != _currentPage && page >=0 && page<=_tabs) {
         [_labels makeObjectsPerformSelector:@selector(setFont:) withObject:[UIFont systemFontOfSize:14]];
-        if (answer < _labels.count) {
-            UILabel *highlightedLabel = (UILabel *)[_labels objectAtIndex:answer];
+        if (page < _labels.count) {
+            UILabel *highlightedLabel = (UILabel *)[_labels objectAtIndex:page];
             [highlightedLabel setFont:[UIFont boldSystemFontOfSize:20]];
         }
 
-        [self setPage:answer];
+        [self setPage:page];
     }
 }
 
 - (void)setPage:(int)page {
+    //Calculate offset
     float offset = _scrollView.frame.size.height*page;
+
+    //Make Adjustments
     if (offset > _scrollView.contentSize.height-_scrollView.frame.size.height) {
         offset = _scrollView.contentSize.height-_scrollView.frame.size.height;
     }
+
+    //Update Variables & Scroll View
     [_scrollView setContentOffset:CGPointMake(_scrollView.contentOffset.x, offset) animated:_animated];
     _currentPage = page;
 }
@@ -232,6 +236,8 @@
             [self setHidden:FALSE];
         }
 
+
+        //Resize Frame
         _currentPage = 0;
         _tabs = tabs;
         CGRect frame = self.frame;
@@ -247,11 +253,13 @@
         frame.origin.y = ([self superview].frame.size.height-frame.size.height)/2;
         [self setFrame:frame];
 
-        //Add Tab Labels
+        //Clear Subviews
         int iter = 0;
         [[self subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
         [self setBackgroundColor:[UIColor clearColor]];
 
+
+        //Add Search if Nessecary
         int increment = tabs;
         if (_hasSearch) {
             increment -= 1;
@@ -266,6 +274,7 @@
             iter+=_tabSize;
         }
 
+        //Repopulate View
         [_labels removeAllObjects];
         for (unsigned int i = 0; i < increment; i++) {
             UILabel *label = [[UILabel alloc] initWithFrame:CGRectMake(0, iter, frame.size.width, _tabSize)];
@@ -288,6 +297,7 @@
             iter+=_tabSize;
         }
 
+        //Handle Backdrop
         if (_addBackdrop) {
             frame.origin.x = 0;
             frame.origin.y = 0;
