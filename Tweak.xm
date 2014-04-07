@@ -12,11 +12,12 @@
 
 //Variables
 static NSString *settingsPath = @"/var/mobile/Library/Preferences/com.frostbitee08.ScrollControl.plist";
-static int maxHeight = 370;
-static int maxTabSize = 60;
+static float _controlVerticalInsets = 40;
+static float _controlWidth = 20;
+static int _maxTabSize = 60;
 
 //Tags
-static int controlTag = 900;
+static int _controlTag = 900;
 
 %ctor {
     if (![[NSFileManager defaultManager] fileExistsAtPath:settingsPath]) {
@@ -46,6 +47,26 @@ static int controlTag = 900;
 	[navigationBar _URLTapped:nil];
 }
 
+- (void)didRotateFromInterfaceOrientation:(int)fp8 {
+	%orig;
+
+	UIScrollView *scrollView = MSHookIvar<UIScrollView *>(self, "_scrollView");
+	UIView *view = [scrollView superview];
+
+	ScrollControl *control = nil;
+	control = (ScrollControl *)[view viewWithTag:_controlTag];
+
+	int tabs = floor(scrollView.contentSize.height/scrollView.frame.size.height);
+	if (tabs < 2) {
+		[control setHidden:TRUE];
+	}
+	else {
+		[control setFrame:CGRectMake(scrollView.frame.size.width-_controlWidth, _controlVerticalInsets, _controlWidth, scrollView.frame.size.height-(_controlVerticalInsets*2))];
+		[control setMaxHeight:scrollView.frame.size.height-(_controlVerticalInsets*2)];
+		[control setFrameWithTabs:tabs];
+	}
+}
+
 - (void)scrollViewDidScroll:(id)fp8 {
 	%orig;
 
@@ -53,11 +74,11 @@ static int controlTag = 900;
 	UIView *view = [scrollView superview];
 
 	ScrollControl *control = nil;
-	control = (ScrollControl *)[view viewWithTag:controlTag];
+	control = (ScrollControl *)[view viewWithTag:_controlTag];
 
 	if (control != nil) {
 		int tabs = ceil(scrollView.contentSize.height/scrollView.frame.size.height);
-		if (tabs >= 3) {
+		if (tabs >= 2) {
 			[control appear];
 			[control updateIndex];
 		}
@@ -71,7 +92,7 @@ static int controlTag = 900;
 	UIView *view = [scrollView superview];
 
 	ScrollControl *control = nil;
-	control = (ScrollControl *)[view viewWithTag:controlTag];
+	control = (ScrollControl *)[view viewWithTag:_controlTag];
 
 	if (control != nil) {
 		[control fade];
@@ -88,20 +109,20 @@ static int controlTag = 900;
 
 		[scrollView setShowsVerticalScrollIndicator:[[settings objectForKey:@"indicator"] boolValue]];
 		ScrollControl *control = nil;
-		control = (ScrollControl *)[view viewWithTag:controlTag];
+		control = (ScrollControl *)[view viewWithTag:_controlTag];
 
 		if (control == nil) {
-			control = [[ScrollControl alloc] initWithFrame:CGRectMake(300, 40, 20, 461)];
+			control = [[ScrollControl alloc] initWithFrame:CGRectMake(scrollView.frame.size.width-_controlWidth, _controlVerticalInsets, _controlWidth, scrollView.frame.size.height-(_controlVerticalInsets*2))];
 			control._scrollView = scrollView;
 
 			[view addSubview:control];
-			[control setMaxTabSize:maxTabSize];
-			[control setMaxHeight:maxHeight];
+			[control setMaxTabSize:_maxTabSize];
+			[control setMaxHeight:scrollView.frame.size.height-(_controlVerticalInsets*2)];
 			[control setHasSearch:[[settings objectForKey:@"hasSearch"] boolValue]];
 			[control setAnimated:[[settings objectForKey:@"animated"] boolValue]];
 			[control setHasBackdrop:YES];
 			control.delegate = self;
-		    control.tag = controlTag;
+		    control.tag = _controlTag;
 
 		    NSString *indicatorType = [settings objectForKey:@"indicatorType"];
 		    if ([indicatorType isEqualToString:@"Bullet"]) {
@@ -116,7 +137,7 @@ static int controlTag = 900;
 		}
 
 		int tabs = floor(scrollView.contentSize.height/scrollView.frame.size.height);
-		if (tabs < 3) {
+		if (tabs < 2) {
 			[control setHidden:TRUE];
 		}
 		else {
