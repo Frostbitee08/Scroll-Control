@@ -11,6 +11,32 @@
 	}
 	return _specifiers;
 }
+
+-(void)mail {
+	[[UIApplication sharedApplication] openURL:[NSURL URLWithString:@"mailto:frostbitee08%40gmail.com?subject=ScrollControl%20(1.0)%20Feedback"]];
+}
+
+-(void)twitter {
+	if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetbot:"]])
+		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[@"tweetbot:///user_profile/" stringByAppendingString:@"frostbitee08"]]];
+
+	else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitterrific:"]]) 
+		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[@"twitterrific:///profile?screen_name=" stringByAppendingString:@"frostbitee08"]]];
+
+	else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"tweetings:"]]) 
+		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[@"tweetings:///user?screen_name=" stringByAppendingString:@"frostbitee08"]]];
+
+	else if ([[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"twitter:"]]) 
+		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[@"twitter://user?screen_name=" stringByAppendingString:@"frostbitee08"]]];
+
+	else 
+		[[UIApplication sharedApplication] openURL:[NSURL URLWithString:[@"https://mobile.twitter.com/" stringByAppendingString:@"frostbitee08"]]];
+}
+
+-(void)relaunch {
+	
+}
+
 @end
 
 // vim:ft=objc

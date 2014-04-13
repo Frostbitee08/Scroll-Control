@@ -1,10 +1,10 @@
 {
-    entry = {
-	bundle = Preferences;
-	cell = PSLinkCell;
-	detail = PreferencesListController;
-	icon = Preferences.png;
-	isController = 1;
-	label = ScrollControl;
-    };
+	entry = {
+		bundle = Preferences;
+		cell = PSLinkCell;
+		detail = "PreferencesListController";
+		icon = "SCPrefs.png";
+		isController = 1;
+		label = ScrollControl;
+	};
 }
