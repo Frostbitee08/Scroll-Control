@@ -23,6 +23,7 @@ typedef enum {
     int _tabs;
     float _tabSize;
     float _maxTabSize;
+    float _minTabSize;
     float _maxHeight;
     bool _animated;
     bool _hasSearch;
@@ -47,7 +48,8 @@ typedef enum {
 - (void)setHasSearch:(bool)hasSearch;
 - (void)setIndicatorType:(SCIndicatorType)type;
 - (void)setMaxHeight:(float)maxHeight;
-- (void)setMaxTabSize:(float)tileSize;
+- (void)setMaxTabSize:(float)tabSize;
+- (void)setMinTabSize:(float)tabSize;
 - (void)setTabs:(int)tabs;
 - (void)setFrameWithTabs:(int)tabs;
 - (void)setAnimated:(BOOL)animate;

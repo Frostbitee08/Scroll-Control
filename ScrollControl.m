@@ -46,6 +46,7 @@
         _tabs = 0;
         _tabSize = 0;
         _maxTabSize = 0;
+        _minTabSize = 10;
         _maxHeight = 0;
         _animated = NO;
         _hasSearch = NO;
@@ -81,6 +82,7 @@
         _tabs = 0;
         _tabSize = 0;
         _maxTabSize = 0;
+        _minTabSize = 10;
         _maxHeight = 0;
         _animated = NO;
         _hasSearch = NO;
@@ -117,8 +119,8 @@
     [_backdrop setHidden:NO];
 
     [_labels makeObjectsPerformSelector:@selector(setTextColor:) withObject:[UIColor whiteColor]];
-    if (_hasSearch && _searchImageWhite) {
-        //[_searchView setImage:_searchImageWhite]; //Why does this Crash? Possibly issues with image from PS?
+    if (_hasSearch) {
+        [_searchView setHighlighted:YES];
     }
     
     return TRUE;
@@ -150,7 +152,7 @@
         [_backdrop setHidden:YES];
         [_labels makeObjectsPerformSelector:@selector(setTextColor:) withObject:[UIColor darkGrayColor]];
         if (_hasSearch) {
-            [_searchView setImage:_searchImage];
+            [_searchView setHighlighted:NO];
         }
 
         [self setHiddenAnimated:TRUE];
@@ -216,8 +218,12 @@
     _maxHeight = maxHeight;
 }
 
-- (void)setMaxTabSize:(float)tileSize {
-    _maxTabSize = tileSize;
+- (void)setMaxTabSize:(float)tabSize {
+    _maxTabSize = tabSize;
+}
+
+- (void)setMinTabSize:(float)tabSize {
+    _minTabSize = tabSize;
 }
 
 - (void)setTabs:(int)tabs {
@@ -242,7 +248,13 @@
         _tabs = tabs;
         CGRect frame = self.frame;
         float height = _maxTabSize * tabs;
-        if (height > _maxHeight) {
+        int increment = tabs;
+        if ((_maxHeight/tabs) < _minTabSize) {
+            height = _maxHeight;
+            _tabSize = _minTabSize;
+            _tabs = floor(_maxHeight/_minTabSize);
+        }
+        else if (height > _maxHeight) {
             height = _maxHeight;
             _tabSize = height/tabs;
         }
@@ -260,13 +272,13 @@
 
 
         //Add Search if Nessecary
-        int increment = tabs;
         if (_hasSearch) {
             increment -= 1;
             UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0, iter, frame.size.width, _tabSize)];
             [view setBackgroundColor:[UIColor clearColor]];
 
             _searchView = [[UIImageView alloc] initWithFrame:CGRectMake((frame.size.width/2)-5, (_tabSize/2)-5,10,10)];
+            [_searchView setHighlightedImage:_searchImageWhite];
             [_searchView setImage:_searchImage];
             [view addSubview:_searchView];
 

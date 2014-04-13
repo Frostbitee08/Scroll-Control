@@ -1,7 +1,7 @@
 #import <UIKit/UIKit.h>
 #import "ScrollControl.h"
 
-@interface BrowserController <ScrollControlDelegate>
+@interface BrowserController <ScrollControlDelegate> 
 - (void)_doSearch:(id)fp8;
 - (void)updateSearchText:(id)fp8;
 @end
@@ -55,19 +55,13 @@ static int _controlTag = 900;
 
 	UIScrollView *scrollView = MSHookIvar<UIScrollView *>(self, "_scrollView");
 	UIView *view = [scrollView superview];
-
 	ScrollControl *control = nil;
 	control = (ScrollControl *)[view viewWithTag:_controlTag];
 
 	int tabs = floor(scrollView.contentSize.height/scrollView.frame.size.height);
-	if (tabs < 2) {
-		[control setHidden:TRUE];
-	}
-	else {
-		[control setFrame:CGRectMake(scrollView.frame.size.width-_controlWidth, _controlVerticalInsets, _controlWidth, scrollView.frame.size.height-(_controlVerticalInsets*2))];
-		[control setMaxHeight:scrollView.frame.size.height-(_controlVerticalInsets*2)];
-		[control setFrameWithTabs:tabs];
-	}
+	[control setFrame:CGRectMake(scrollView.frame.size.width-_controlWidth, _controlVerticalInsets, _controlWidth, scrollView.frame.size.height-(_controlVerticalInsets*2))];
+	[control setMaxHeight:scrollView.frame.size.height-(_controlVerticalInsets*2)];
+	[control setFrameWithTabs:tabs];
 }
 
 //Show ScrollControl and update index to reflect current page
