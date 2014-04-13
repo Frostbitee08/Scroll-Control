@@ -49,19 +49,24 @@ static int _controlTag = 900;
 	[navigationBar _URLTapped:nil];
 }
 
-//Called when device rotates, adjusts ScrollControl's frame accordingly
+//Called when device rotates, disable SC for landscape
 - (void)didRotateFromInterfaceOrientation:(int)fp8 {
 	%orig;
 
+	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:settingsPath];
 	UIScrollView *scrollView = MSHookIvar<UIScrollView *>(self, "_scrollView");
+	int orientation = MSHookIvar<int>(self, "_orientation");
 	UIView *view = [scrollView superview];
-	ScrollControl *control = nil;
-	control = (ScrollControl *)[view viewWithTag:_controlTag];
+	ScrollControl *control = (ScrollControl *)[view viewWithTag:_controlTag];
 
-	int tabs = floor(scrollView.contentSize.height/scrollView.frame.size.height);
-	[control setFrame:CGRectMake(scrollView.frame.size.width-_controlWidth, _controlVerticalInsets, _controlWidth, scrollView.frame.size.height-(_controlVerticalInsets*2))];
-	[control setMaxHeight:scrollView.frame.size.height-(_controlVerticalInsets*2)];
-	[control setFrameWithTabs:tabs];
+	if (orientation == 1) {
+		[scrollView setShowsVerticalScrollIndicator:[[settings objectForKey:@"indicator"] boolValue]];
+		[control setHidden:FALSE];
+	}
+	else {
+		[control setHidden:TRUE];
+		[scrollView setShowsVerticalScrollIndicator:YES];
+	}
 }
 
 //Show ScrollControl and update index to reflect current page
@@ -69,12 +74,13 @@ static int _controlTag = 900;
 	%orig;
 
 	UIScrollView *scrollView = MSHookIvar<UIScrollView *>(self, "_scrollView");
+	int orientation = MSHookIvar<int>(self, "_orientation");
 	UIView *view = [scrollView superview];
 
 	ScrollControl *control = nil;
 	control = (ScrollControl *)[view viewWithTag:_controlTag];
 
-	if (control != nil) {
+	if (control != nil && orientation == 1) {
 		int tabs = ceil(scrollView.contentSize.height/scrollView.frame.size.height);
 		if (tabs >= 2) {
 			[control appear];
@@ -88,12 +94,13 @@ static int _controlTag = 900;
 	%orig;
 	
 	UIScrollView *scrollView = MSHookIvar<UIScrollView *>(self, "_scrollView");
+	int orientation = MSHookIvar<int>(self, "_orientation");
 	UIView *view = [scrollView superview];
 
 	ScrollControl *control = nil;
 	control = (ScrollControl *)[view viewWithTag:_controlTag];
 
-	if (control != nil) {
+	if (control != nil && orientation == 1) {
 		[control fade];
 	}
 }
@@ -103,7 +110,8 @@ static int _controlTag = 900;
 	%orig;
 
 	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:settingsPath];
-	if ([[settings objectForKey:@"enabled"] boolValue]) {
+	int orientation = MSHookIvar<int>(self, "_orientation");
+	if ([[settings objectForKey:@"enabled"] boolValue] && orientation == 1) {
 		//Initial Variables
 		UIScrollView *scrollView = MSHookIvar<UIScrollView *>(self, "_scrollView");
 		UIView *view = [scrollView superview];
