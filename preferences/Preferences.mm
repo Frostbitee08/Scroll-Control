@@ -34,7 +34,7 @@
 }
 
 -(void)relaunch {
-	
+	system("killall -9 MobileSafari");
 }
 
 @end

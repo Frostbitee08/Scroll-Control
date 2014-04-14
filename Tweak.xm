@@ -4,6 +4,8 @@
 @interface BrowserController <ScrollControlDelegate> 
 - (void)_doSearch:(id)fp8;
 - (void)updateSearchText:(id)fp8;
+- (void)reloadPrefs;
+- (void)updateScrollViewContentSize;
 @end
 
 @interface NavigationBar
@@ -40,11 +42,65 @@ static int _controlTag = 900;
     }
 }
 
+%hook Application 
+
+//Call Reload Prefs when application resumes
+- (void)applicationDidBecomeActive:(id)fp8 {
+	%orig;
+
+	BrowserController *controller = MSHookIvar<BrowserController *>(self, "_controller");
+	[controller reloadPrefs];
+}
+
+%end
+
 %hook BrowserController
+
+//Reload preferences when application resumes
+%new
+- (void)reloadPrefs {
+	NSMutableDictionary *settings = [NSMutableDictionary dictionaryWithContentsOfFile:settingsPath];
+	UIScrollView *scrollView = MSHookIvar<UIScrollView *>(self, "_scrollView");
+	int orientation = MSHookIvar<int>(self, "_orientation");
+	UIView *view = [scrollView superview];
+	ScrollControl *control = nil;
+	control = (ScrollControl *)[view viewWithTag:_controlTag];
+
+	if (control != nil) {
+		if (orientation == 1) {
+			[scrollView setShowsVerticalScrollIndicator:[[settings objectForKey:@"indicator"] boolValue]];
+		}
+		else {
+			[scrollView setShowsVerticalScrollIndicator:YES];
+		}
+
+		[control setHasSearch:[[settings objectForKey:@"hasSearch"] boolValue]];
+		[control setAnimated:[[settings objectForKey:@"animated"] boolValue]];
+
+		NSString *indicatorType = [settings objectForKey:@"indicatorType"];
+		if ([indicatorType isEqualToString:@"Bullet"]) {
+			[control setIndicatorType:SCIndicatorTypeBullet];
+		}
+		else if ([indicatorType isEqualToString:@"Alphabetical"]) {
+			[control setIndicatorType:SCIndicatorTypeAlphabetical];
+		}
+		else if ([indicatorType isEqualToString:@"Numerical"]) {
+			[control setIndicatorType:SCIndicatorTypeNumerical];
+		}
+
+		int tabs = floor(scrollView.contentSize.height/scrollView.frame.size.height);
+		if (tabs < 2) {
+			[control setHidden:TRUE];
+		}
+		else {
+			[control setFrameWithTabs:tabs];
+		}
+	}
+}
 
 //Brings up the URL UITextFeild
 %new
--(void)search {
+- (void)search {
 	NavigationBar *navigationBar = MSHookIvar<NavigationBar *>(self, "_navigationBar");
 	[navigationBar _URLTapped:nil];
 }
@@ -57,13 +113,14 @@ static int _controlTag = 900;
 	UIScrollView *scrollView = MSHookIvar<UIScrollView *>(self, "_scrollView");
 	int orientation = MSHookIvar<int>(self, "_orientation");
 	UIView *view = [scrollView superview];
-	ScrollControl *control = (ScrollControl *)[view viewWithTag:_controlTag];
+	ScrollControl *control = nil;
+	control = (ScrollControl *)[view viewWithTag:_controlTag];
 
-	if (orientation == 1) {
+	if (orientation == 1 && control != nil) {
 		[scrollView setShowsVerticalScrollIndicator:[[settings objectForKey:@"indicator"] boolValue]];
 		[control setHidden:FALSE];
 	}
-	else {
+	else if (control != nil) {
 		[control setHidden:TRUE];
 		[scrollView setShowsVerticalScrollIndicator:YES];
 	}
@@ -81,7 +138,7 @@ static int _controlTag = 900;
 	control = (ScrollControl *)[view viewWithTag:_controlTag];
 
 	if (control != nil && orientation == 1) {
-		int tabs = ceil(scrollView.contentSize.height/scrollView.frame.size.height);
+		int tabs = floor(scrollView.contentSize.height/scrollView.frame.size.height);
 		if (tabs >= 2) {
 			[control appear];
 			[control updateIndex];

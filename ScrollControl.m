@@ -167,7 +167,7 @@
         UILabel *highlightedLabel = (UILabel *)[_labels objectAtIndex:page];
         [highlightedLabel setFont:[UIFont boldSystemFontOfSize:20]];
     }
-    else {
+    else if (_labels.count > 0) {
         UILabel *highlightedLabel = (UILabel *)[_labels objectAtIndex:0];
         [highlightedLabel setFont:[UIFont boldSystemFontOfSize:20]];
     }
